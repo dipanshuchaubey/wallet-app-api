@@ -5,9 +5,6 @@ const db = require('./config/db');
 // Mount ENV file
 dotenv.config({ path: './config/config.env' });
 
-// Import Model
-const Account = require('./models/Account');
-
 // Connect Database
 db.authenticate()
   .then(() => console.log('Database connected'))
@@ -18,21 +15,11 @@ const app = express();
 // Body parser
 app.use(express.json());
 
-app.get('/', async (req, res, next) => {
-  const data = await Account.findAll();
-  res.status(200).json({ success: true, data });
-});
+// Import router files
+const Users = require('./routes/users');
 
-app.post('/user', async (req, res, next) => {
-  const data = await Account.create(req.body);
-
-  try {
-    res.status(201).json({ success: true, data });
-  } catch (err) {
-    console.log(err);
-    res.status(400).json({ success: false });
-  }
-});
+// Mount routes
+app.use('/', Users);
 
 const PORT = process.env.PORT || 5000;
 
