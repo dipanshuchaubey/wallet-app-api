@@ -18,10 +18,12 @@ app.use(express.json());
 // Import router files
 const Users = require('./routes/users');
 const Auth = require('./routes/auth');
+const Transaction = require('./routes/transaction');
 
 // Mount routes
 app.use('/', Users);
 app.use('/auth', Auth);
+app.use('/transaction', Transaction);
 
 const PORT = process.env.PORT || 5000;
 

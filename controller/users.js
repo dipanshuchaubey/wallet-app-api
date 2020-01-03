@@ -1,7 +1,7 @@
 const Account = require('../models/Account');
 
 exports.getAllUsers = async (req, res, next) => {
-  const data = await Account.findAll();
+  const data = await Account.findAll({ attributes: { exclude: ['password'] } });
   res.status(200).json({ success: true, data });
 };
 
