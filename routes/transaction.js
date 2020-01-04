@@ -9,14 +9,15 @@ const {
 
 const router = express.Router();
 
-router.get('/', getAllTransactions);
+router
+  .route('/')
+  .get(getAllTransactions)
+  .post(createTransaction);
 
-router.post('/', createTransaction);
-
-router.get('/:transactionId', getSingleTransaction);
-
-router.put('/:transactionId', updateTransaction);
-
-router.delete('/:transactionId', deleteTransaction);
+router
+  .route('/:transactionId')
+  .get(getSingleTransaction)
+  .put(updateTransaction)
+  .delete(deleteTransaction);
 
 module.exports = router;

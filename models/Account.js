@@ -1,6 +1,7 @@
 const Sequelize = require('sequelize');
 const db = require('../config/db');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const Account = db.define('Account', {
   accountNumber: {
@@ -47,10 +48,18 @@ const Account = db.define('Account', {
   }
 });
 
+// Hash password
 Account.beforeSave(async function(Account) {
   const salt = await bcrypt.genSalt(10);
 
   Account.password = await bcrypt.hash(Account.password, salt);
 });
+
+// Sign JWT
+Account.signJWT = async function(payload) {
+  return await jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE
+  });
+};
 
 module.exports = Account;

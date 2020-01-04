@@ -9,13 +9,19 @@ const bcrypt = require('bcryptjs');
 exports.login = async (req, res, next) => {
   const { email, password } = req.body;
 
+  // Check if user exists
   const account = await Account.findOne({ where: { email } });
 
   if (account) {
+    // Compare entered password with password in DB
     const checkPassword = await bcrypt.compare(password, account.password);
 
     if (checkPassword) {
-      res.status(200).json({ success: true, data: account });
+      // Sign JWT
+      const token = await Account.signJWT({
+        accountNumber: account.accountNumber
+      });
+      res.status(200).json({ success: true, token });
     } else {
       res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
