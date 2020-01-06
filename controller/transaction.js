@@ -6,7 +6,10 @@ const Transaction = require('../models/Transaction');
  * @access  Private
  */
 exports.getAllTransactions = async (req, res, next) => {
-  const data = await Transaction.findAll();
+  const accountNumber = req.user.accountNumber;
+
+  // Only get transactions of currently logged in user
+  const data = await Transaction.findAll({ where: { accountNumber } });
 
   res.status(200).json({ success: true, data });
 };
@@ -17,9 +20,16 @@ exports.getAllTransactions = async (req, res, next) => {
  * @access  Private
  */
 exports.getSingleTransaction = async (req, res, next) => {
+  const accountNumber = req.user.accountNumber;
+
+  // Only get transactions of currently logged in user
   const data = await Transaction.findOne({
-    where: { id: req.params.transactionId }
+    where: { id: req.params.transactionId, accountNumber }
   });
+
+  if (data[0] === 0) {
+    res.status(404).json({ success: false, message: 'No record found' });
+  }
 
   res.status(200).json({ success: true, data });
 };
@@ -30,6 +40,8 @@ exports.getSingleTransaction = async (req, res, next) => {
  * @access  Private
  */
 exports.createTransaction = async (req, res, next) => {
+  req.body.accountNumber = req.user.accountNumber;
+
   const data = await Transaction.create(req.body);
 
   res.status(201).json({ success: true, data });
@@ -42,7 +54,10 @@ exports.createTransaction = async (req, res, next) => {
  */
 exports.updateTransaction = async (req, res, next) => {
   const data = await Transaction.update(req.body, {
-    where: { id: req.params.transactionId }
+    where: {
+      id: req.params.transactionId,
+      accountNumber: req.user.accountNumber
+    }
   });
 
   /**
@@ -66,7 +81,10 @@ exports.updateTransaction = async (req, res, next) => {
  */
 exports.deleteTransaction = async (req, res, next) => {
   const data = await Transaction.destroy({
-    where: { id: req.params.transactionId }
+    where: {
+      id: req.params.transactionId,
+      accountNumber: req.user.accountNumber
+    }
   });
 
   if (data) {

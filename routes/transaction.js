@@ -6,18 +6,19 @@ const {
   updateTransaction,
   deleteTransaction
 } = require('../controller/transaction');
+const { authorize } = require('../middleware/authenticateUser');
 
 const router = express.Router();
 
 router
   .route('/')
-  .get(getAllTransactions)
-  .post(createTransaction);
+  .get(authorize, getAllTransactions)
+  .post(authorize, createTransaction);
 
 router
   .route('/:transactionId')
-  .get(getSingleTransaction)
-  .put(updateTransaction)
-  .delete(deleteTransaction);
+  .get(authorize, getSingleTransaction)
+  .put(authorize, updateTransaction)
+  .delete(authorize, deleteTransaction);
 
 module.exports = router;

@@ -10,6 +10,7 @@ const Account = db.define('Account', {
   },
   email: {
     type: Sequelize.STRING,
+    allowNull: false,
     validate: {
       isUnique: function(value, next) {
         Account.findOne({
@@ -27,6 +28,7 @@ const Account = db.define('Account', {
   },
   password: {
     type: Sequelize.STRING,
+    allowNull: false,
     validate: {
       len: {
         args: 6,
@@ -35,16 +37,20 @@ const Account = db.define('Account', {
     }
   },
   firstName: {
-    type: Sequelize.STRING
+    type: Sequelize.STRING,
+    allowNull: false
   },
   lastName: {
-    type: Sequelize.STRING
+    type: Sequelize.STRING,
+    allowNull: false
   },
   balance: {
-    type: Sequelize.INTEGER
+    type: Sequelize.INTEGER,
+    allowNull: false
   },
   currency: {
-    type: Sequelize.STRING
+    type: Sequelize.STRING,
+    allowNull: false
   }
 });
 
@@ -56,10 +62,14 @@ Account.beforeSave(async function(Account) {
 });
 
 // Sign JWT
-Account.signJWT = async function(payload) {
-  return await jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE
-  });
+Account.prototype.signJWT = function() {
+  return jwt.sign(
+    { accountNumber: this.accountNumber },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_EXPIRE
+    }
+  );
 };
 
 module.exports = Account;

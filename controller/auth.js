@@ -10,7 +10,10 @@ exports.login = async (req, res, next) => {
   const { email, password } = req.body;
 
   // Check if user exists
-  const account = await Account.findOne({ where: { email } });
+  const account = await Account.findOne({
+    attributes: { include: ['accountNumber', 'password'] },
+    where: { email }
+  });
 
   if (account) {
     // Compare entered password with password in DB
@@ -18,9 +21,8 @@ exports.login = async (req, res, next) => {
 
     if (checkPassword) {
       // Sign JWT
-      const token = await Account.signJWT({
-        accountNumber: account.accountNumber
-      });
+
+      const token = await account.signJWT();
       res.status(200).json({ success: true, token });
     } else {
       res.status(401).json({ success: false, message: 'Invalid credentials' });
@@ -28,6 +30,20 @@ exports.login = async (req, res, next) => {
   } else {
     res.status(401).json({ success: false, message: 'Invalid credentials' });
   }
+};
+
+/**
+ * @desc    Get currently  signedin user
+ * @route   POST /auth/me
+ * @access  Private
+ */
+exports.currentlySignedInUser = async (req, res, next) => {
+  const data = await Account.findOne({
+    attributes: { exclude: ['password'] },
+    where: { accountNumber: req.user.accountNumber }
+  });
+
+  res.status(200).json({ success: true, data });
 };
 
 /**
