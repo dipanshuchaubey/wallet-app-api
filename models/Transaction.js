@@ -12,8 +12,7 @@ const Transaction = db.define('Transaction', {
   },
   type: {
     type: Sequelize.STRING,
-    allowNull: false,
-    values: ['DEBIT', 'CREDIT']
+    allowNull: false
   },
   details: {
     type: Sequelize.STRING,
