@@ -11,8 +11,8 @@ exports.login = async (req, res, next) => {
 
   // Check if user exists
   const account = await Account.findOne({
-    attributes: { include: ['accountNumber', 'password'] },
-    where: { email }
+    where: { email },
+    attributes: ['accountNumber', 'password']
   });
 
   if (account) {

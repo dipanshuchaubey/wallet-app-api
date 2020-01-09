@@ -50,7 +50,7 @@ exports.createTransaction = async (req, res, next) => {
   });
 
   if (account.balance < req.body.amount && req.body.type !== 'CREDIT') {
-    res
+    return res
       .status(401)
       .json({ success: false, message: 'You dont have enough balance' });
   }
