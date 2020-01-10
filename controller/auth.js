@@ -1,4 +1,5 @@
 const Account = require('../models/Account');
+const Transaction = require('../models/Transaction');
 const bcrypt = require('bcryptjs');
 
 /**
@@ -55,4 +56,23 @@ exports.signUp = async (req, res, next) => {
   const data = await Account.create(req.body);
 
   res.status(201).json({ success: true, data });
+};
+
+/**
+ * @desc    Delete user account
+ * @route   DELETE /auth/me
+ * @access  Private
+ */
+exports.deleteUserAccount = async (req, res, next) => {
+  await Transaction.destroy({
+    where: { accountNumber: req.user.accountNumber }
+  });
+
+  await Account.destroy({
+    where: { accountNumber: req.user.accountNumber }
+  });
+
+  res
+    .status(200)
+    .json({ success: true, message: 'Account deleted successfully' });
 };

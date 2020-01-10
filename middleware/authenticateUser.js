@@ -13,10 +13,18 @@ exports.authorize = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    req.user = await Account.findOne({
+    const account = await Account.findOne({
       attributes: { exclude: ['password'] },
       where: { accountNumber: decoded.accountNumber }
     });
+
+    if (!account) {
+      return res
+        .status(401)
+        .json({ success: false, message: 'You are unauthorized' });
+    }
+
+    req.user = account;
 
     return next();
   } catch (err) {
