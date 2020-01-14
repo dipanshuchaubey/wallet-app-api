@@ -15,13 +15,16 @@ const app = express();
 // Body parser
 app.use(express.json());
 
+// Static folder
+app.use(express.static('./public'));
+
 // Import router files
 const Users = require('./routes/users');
 const Auth = require('./routes/auth');
 const Transaction = require('./routes/transaction');
 
 // Mount routes
-app.use('/', Users);
+// app.use('/', Users);
 app.use('/auth', Auth);
 app.use('/transaction', Transaction);
 
