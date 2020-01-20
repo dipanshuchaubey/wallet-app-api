@@ -2,6 +2,9 @@ const express = require('express');
 const dotenv = require('dotenv');
 const db = require('./config/db');
 
+// Middlewares
+const errorHandler = require('./middleware/errorHandler');
+
 // Mount ENV file
 dotenv.config({ path: './config/config.env' });
 
@@ -27,6 +30,9 @@ const Transaction = require('./routes/transaction');
 // app.use('/', Users);
 app.use('/auth', Auth);
 app.use('/transaction', Transaction);
+
+// Mount middlewares
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 

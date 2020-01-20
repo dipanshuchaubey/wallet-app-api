@@ -10,6 +10,13 @@ const bcrypt = require('bcryptjs');
 exports.login = async (req, res, next) => {
   const { email, password } = req.body;
 
+  // If credentials are not provided throw error
+  if (!email || !password) {
+    res
+      .status(400)
+      .json({ success: false, error: 'Please enter username and password' });
+  }
+
   // Check if user exists
   const account = await Account.findOne({
     where: { email },
@@ -53,9 +60,13 @@ exports.currentlySignedInUser = async (req, res, next) => {
  * @access  Public
  */
 exports.signUp = async (req, res, next) => {
-  const data = await Account.create(req.body);
+  try {
+    const data = await Account.create(req.body);
 
-  res.status(201).json({ success: true, data });
+    res.status(201).json({ success: true, data });
+  } catch (err) {
+    next(err);
+  }
 };
 
 /**
