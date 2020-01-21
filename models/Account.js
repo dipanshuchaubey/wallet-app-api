@@ -6,12 +6,21 @@ const jwt = require('jsonwebtoken');
 const Account = db.define('Account', {
   accountNumber: {
     type: Sequelize.STRING,
-    allowNull: false
+    allowNull: false,
+    unique: true,
+    validate: {
+      notNull: {
+        msg: 'Account number is required'
+      }
+    }
   },
   email: {
     type: Sequelize.STRING,
     allowNull: false,
     validate: {
+      notNull: {
+        msg: 'Email is required'
+      },
       isUnique: function(value, next) {
         Account.findOne({
           where: { email: value },
@@ -33,24 +42,46 @@ const Account = db.define('Account', {
       len: {
         args: 6,
         msg: 'Password should be atleast 6 characters'
+      },
+      notNull: {
+        msg: 'Password is required'
       }
     }
   },
   firstName: {
     type: Sequelize.STRING,
-    allowNull: false
+    allowNull: false,
+    validate: {
+      notNull: {
+        msg: 'First name is required'
+      }
+    }
   },
   lastName: {
-    type: Sequelize.STRING,
-    allowNull: false
+    type: Sequelize.STRING
   },
   balance: {
     type: Sequelize.INTEGER,
-    allowNull: false
+    allowNull: false,
+    validate: {
+      min: 0,
+      notNull: {
+        msg: 'Balance amount is required'
+      }
+    }
   },
   currency: {
     type: Sequelize.STRING,
-    allowNull: false
+    allowNull: false,
+    validate: {
+      isIn: {
+        args: [['INR', 'USD', 'EUR', 'YEN']],
+        msg: 'Entered currency is not available'
+      },
+      notNull: {
+        msg: 'Curreny is required'
+      }
+    }
   }
 });
 

@@ -41,38 +41,42 @@ exports.getSingleTransaction = async (req, res, next) => {
  * @access  Private
  */
 exports.createTransaction = async (req, res, next) => {
-  req.body.accountNumber = req.user.accountNumber;
+  try {
+    req.body.accountNumber = req.user.accountNumber;
 
-  // Check if account have enough balance
-  const account = await Accont.findOne({
-    where: { accountNumber: req.user.accountNumber },
-    attributes: ['balance']
-  });
+    // Check if account have enough balance
+    const account = await Accont.findOne({
+      where: { accountNumber: req.user.accountNumber },
+      attributes: ['balance']
+    });
 
-  if (account.balance < req.body.amount && req.body.type !== 'CREDIT') {
-    return res
-      .status(401)
-      .json({ success: false, message: 'You dont have enough balance' });
+    if (account.balance < req.body.amount && req.body.type !== 'CREDIT') {
+      return res
+        .status(401)
+        .json({ success: false, message: 'You dont have enough balance' });
+    }
+
+    // If transection is CREFIT
+    if (req.body.type === 'CREDIT') {
+      await Accont.update(
+        { balance: account.balance + req.body.amount },
+        { where: { accountNumber: req.user.accountNumber } }
+      );
+    } else if (req.body.type === 'DEBIT') {
+      // Deduct amount from account balance
+      await Accont.update(
+        { balance: account.balance - req.body.amount },
+        { where: { accountNumber: req.user.accountNumber } }
+      );
+    }
+
+    // Create transaction record
+    const data = await Transaction.create(req.body);
+
+    res.status(201).json({ success: true, data });
+  } catch (err) {
+    next(err);
   }
-
-  // If transection is CREFIT
-  if (req.body.type === 'CREDIT') {
-    await Accont.update(
-      { balance: account.balance + req.body.amount },
-      { where: { accountNumber: req.user.accountNumber } }
-    );
-  } else {
-    // Deduct amount from account balance
-    await Accont.update(
-      { balance: account.balance - req.body.amount },
-      { where: { accountNumber: req.user.accountNumber } }
-    );
-  }
-
-  // Create transaction record
-  const data = await Transaction.create(req.body);
-
-  res.status(201).json({ success: true, data });
 };
 
 /**

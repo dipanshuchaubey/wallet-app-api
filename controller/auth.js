@@ -45,6 +45,17 @@ exports.login = async (req, res, next) => {
  * @route   POST /auth/me
  * @access  Private
  */
+
+/**
+ *   Logout functionality will be implimented when cookies of user data will be stored
+ *   in the browser.
+ */
+
+/**
+ * @desc    Get currently  signedin user
+ * @route   POST /auth/me
+ * @access  Private
+ */
 exports.currentlySignedInUser = async (req, res, next) => {
   const data = await Account.findOne({
     attributes: { exclude: ['password'] },
@@ -75,15 +86,21 @@ exports.signUp = async (req, res, next) => {
  * @access  Private
  */
 exports.deleteUserAccount = async (req, res, next) => {
-  await Transaction.destroy({
-    where: { accountNumber: req.user.accountNumber }
-  });
+  try {
+    // Delete all the tranactions related to the account
+    await Transaction.destroy({
+      where: { accountNumber: req.user.accountNumber }
+    });
 
-  await Account.destroy({
-    where: { accountNumber: req.user.accountNumber }
-  });
+    // Delete account
+    await Account.destroy({
+      where: { accountNumber: req.user.accountNumber }
+    });
 
-  res
-    .status(200)
-    .json({ success: true, message: 'Account deleted successfully' });
+    res
+      .status(200)
+      .json({ success: true, message: 'Account deleted successfully' });
+  } catch (err) {
+    next(err);
+  }
 };

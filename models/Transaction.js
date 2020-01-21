@@ -8,19 +8,29 @@ const Transaction = db.define('Transaction', {
   },
   amount: {
     type: Sequelize.INTEGER,
-    allowNull: false
+    allowNull: false,
+    validate: {
+      min: 0,
+      notNull: {
+        msg: 'Amount is required'
+      }
+    }
   },
   type: {
     type: Sequelize.STRING,
-    allowNull: false
+    allowNull: false,
+    validate: {
+      isIn: {
+        args: [['DEBIT', 'CREDIT']],
+        msg: 'Transaction type not allowed'
+      }
+    }
   },
   details: {
-    type: Sequelize.STRING,
-    allowNull: false
+    type: Sequelize.STRING
   },
   paymentMethod: {
-    type: Sequelize.STRING,
-    allowNull: false
+    type: Sequelize.STRING
   }
 });
 

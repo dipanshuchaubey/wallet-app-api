@@ -22,7 +22,7 @@ app.use(express.json());
 app.use(express.static('./public'));
 
 // Import router files
-const Users = require('./routes/users');
+//const Users = require('./routes/users');
 const Auth = require('./routes/auth');
 const Transaction = require('./routes/transaction');
 
