@@ -8,35 +8,41 @@ const bcrypt = require('bcryptjs');
  * @access  Public
  */
 exports.login = async (req, res, next) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  // If credentials are not provided throw error
-  if (!email || !password) {
-    res
-      .status(400)
-      .json({ success: false, error: 'Please enter username and password' });
-  }
+    // If credentials are not provided throw error
+    if (!email || !password) {
+      res
+        .status(400)
+        .json({ success: false, error: 'Please enter username and password' });
+    }
 
-  // Check if user exists
-  const account = await Account.findOne({
-    where: { email },
-    attributes: ['accountNumber', 'password']
-  });
+    // Check if user exists
+    const account = await Account.findOne({
+      where: { email },
+      attributes: ['accountNumber', 'password']
+    });
 
-  if (account) {
-    // Compare entered password with password in DB
-    const checkPassword = await bcrypt.compare(password, account.password);
+    if (account) {
+      // Compare entered password with password in DB
+      const checkPassword = await bcrypt.compare(password, account.password);
 
-    if (checkPassword) {
-      // Sign JWT
+      if (checkPassword) {
+        // Sign JWT
 
-      const token = await account.signJWT();
-      res.status(200).json({ success: true, token });
+        const token = await account.signJWT();
+        res.status(200).json({ success: true, token });
+      } else {
+        res
+          .status(401)
+          .json({ success: false, message: 'Invalid credentials' });
+      }
     } else {
       res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
-  } else {
-    res.status(401).json({ success: false, message: 'Invalid credentials' });
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -57,12 +63,16 @@ exports.login = async (req, res, next) => {
  * @access  Private
  */
 exports.currentlySignedInUser = async (req, res, next) => {
-  const data = await Account.findOne({
-    attributes: { exclude: ['password'] },
-    where: { accountNumber: req.user.accountNumber }
-  });
+  try {
+    const data = await Account.findOne({
+      attributes: { exclude: ['password'] },
+      where: { accountNumber: req.user.accountNumber }
+    });
 
-  res.status(200).json({ success: true, data });
+    res.status(200).json({ success: true, data });
+  } catch (err) {
+    next(err);
+  }
 };
 
 /**

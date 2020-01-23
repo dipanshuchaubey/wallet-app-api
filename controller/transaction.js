@@ -7,12 +7,16 @@ const Accont = require('../models/Account');
  * @access  Private
  */
 exports.getAllTransactions = async (req, res, next) => {
-  const accountNumber = req.user.accountNumber;
+  try {
+    const accountNumber = req.user.accountNumber;
 
-  // Only get transactions of currently logged in user
-  const data = await Transaction.findAll({ where: { accountNumber } });
+    // Only get transactions of currently logged in user
+    const data = await Transaction.findAll({ where: { accountNumber } });
 
-  res.status(200).json({ success: true, data });
+    res.status(200).json({ success: true, data });
+  } catch (err) {
+    next(err);
+  }
 };
 
 /**
@@ -21,18 +25,22 @@ exports.getAllTransactions = async (req, res, next) => {
  * @access  Private
  */
 exports.getSingleTransaction = async (req, res, next) => {
-  const accountNumber = req.user.accountNumber;
+  try {
+    const accountNumber = req.user.accountNumber;
 
-  // Only get transactions of currently logged in user
-  const data = await Transaction.findOne({
-    where: { id: req.params.transactionId, accountNumber }
-  });
+    // Only get transactions of currently logged in user
+    const data = await Transaction.findOne({
+      where: { id: req.params.transactionId, accountNumber }
+    });
 
-  if (data[0] === 0) {
-    res.status(404).json({ success: false, message: 'No record found' });
+    if (data[0] === 0) {
+      res.status(404).json({ success: false, message: 'No record found' });
+    }
+
+    res.status(200).json({ success: true, data });
+  } catch (err) {
+    next(err);
   }
-
-  res.status(200).json({ success: true, data });
 };
 
 /**
@@ -85,24 +93,30 @@ exports.createTransaction = async (req, res, next) => {
  * @access  Private
  */
 exports.updateTransaction = async (req, res, next) => {
-  const data = await Transaction.update(req.body, {
-    where: {
-      id: req.params.transactionId,
-      accountNumber: req.user.accountNumber
-    }
-  });
+  try {
+    const data = await Transaction.update(req.body, {
+      where: {
+        id: req.params.transactionId,
+        accountNumber: req.user.accountNumber
+      }
+    });
 
-  /**
-   * Sequalize retruns an array with a single elemet that is
-   * the number of records that has been updated
-   * If no records has been updated sequalize returns [0]
-   */
-  if (data[0] !== 0) {
-    res
-      .status(201)
-      .json({ success: true, message: 'Record updated successfully' });
-  } else {
-    res.status(404).json({ success: false, message: 'Record does not exists' });
+    /**
+     * Sequalize retruns an array with a single elemet that is
+     * the number of records that has been updated
+     * If no records has been updated sequalize returns [0]
+     */
+    if (data[0] !== 0) {
+      res
+        .status(201)
+        .json({ success: true, message: 'Record updated successfully' });
+    } else {
+      res
+        .status(404)
+        .json({ success: false, message: 'Record does not exists' });
+    }
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -112,22 +126,26 @@ exports.updateTransaction = async (req, res, next) => {
  * @access  Private
  */
 exports.deleteTransaction = async (req, res, next) => {
-  const data = await Transaction.destroy({
-    where: {
-      id: req.params.transactionId,
-      accountNumber: req.user.accountNumber
-    }
-  });
+  try {
+    const data = await Transaction.destroy({
+      where: {
+        id: req.params.transactionId,
+        accountNumber: req.user.accountNumber
+      }
+    });
 
-  if (data) {
-    res.status(200).json({
-      success: true,
-      message: `Record with id ${req.params.transactionId} Deleted`
-    });
-  } else {
-    res.status(404).json({
-      success: true,
-      message: `Record does not exists`
-    });
+    if (data) {
+      res.status(200).json({
+        success: true,
+        message: `Record with id ${req.params.transactionId} Deleted`
+      });
+    } else {
+      res.status(404).json({
+        success: true,
+        message: `Record does not exists`
+      });
+    }
+  } catch (err) {
+    next(err);
   }
 };
