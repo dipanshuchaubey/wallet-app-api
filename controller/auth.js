@@ -1,5 +1,6 @@
 const Account = require('../models/Account');
 const Transaction = require('../models/Transaction');
+const asyncHandler = require('../middleware/asyncHandler');
 const bcrypt = require('bcryptjs');
 
 /**
@@ -7,44 +8,38 @@ const bcrypt = require('bcryptjs');
  * @route   POST /auth/login
  * @access  Public
  */
-exports.login = async (req, res, next) => {
-  try {
-    const { email, password } = req.body;
+exports.login = asyncHandler(async (req, res, next) => {
+  const { email, password } = req.body;
 
-    // If credentials are not provided throw error
-    if (!email || !password) {
-      res
-        .status(400)
-        .json({ success: false, error: 'Please enter username and password' });
-    }
+  // If credentials are not provided throw error
+  if (!email || !password) {
+    res
+      .status(400)
+      .json({ success: false, error: 'Please enter username and password' });
+  }
 
-    // Check if user exists
-    const account = await Account.findOne({
-      where: { email },
-      attributes: ['accountNumber', 'password']
-    });
+  // Check if user exists
+  const account = await Account.findOne({
+    where: { email },
+    attributes: ['accountNumber', 'password']
+  });
 
-    if (account) {
-      // Compare entered password with password in DB
-      const checkPassword = await bcrypt.compare(password, account.password);
+  if (account) {
+    // Compare entered password with password in DB
+    const checkPassword = await bcrypt.compare(password, account.password);
 
-      if (checkPassword) {
-        // Sign JWT
+    if (checkPassword) {
+      // Sign JWT
 
-        const token = await account.signJWT();
-        res.status(200).json({ success: true, token });
-      } else {
-        res
-          .status(401)
-          .json({ success: false, message: 'Invalid credentials' });
-      }
+      const token = await account.signJWT();
+      res.status(200).json({ success: true, token });
     } else {
       res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
-  } catch (err) {
-    next(err);
+  } else {
+    res.status(401).json({ success: false, message: 'Invalid credentials' });
   }
-};
+});
 
 /**
  * @desc    Get currently  signedin user
@@ -62,55 +57,43 @@ exports.login = async (req, res, next) => {
  * @route   POST /auth/me
  * @access  Private
  */
-exports.currentlySignedInUser = async (req, res, next) => {
-  try {
-    const data = await Account.findOne({
-      attributes: { exclude: ['password'] },
-      where: { accountNumber: req.user.accountNumber }
-    });
+exports.currentlySignedInUser = asyncHandler(async (req, res, next) => {
+  const data = await Account.findOne({
+    attributes: { exclude: ['password'] },
+    where: { accountNumber: req.user.accountNumber }
+  });
 
-    res.status(200).json({ success: true, data });
-  } catch (err) {
-    next(err);
-  }
-};
+  res.status(200).json({ success: true, data });
+});
 
 /**
  * @desc    Signup user
  * @route   POST /auth/signup
  * @access  Public
  */
-exports.signUp = async (req, res, next) => {
-  try {
-    const data = await Account.create(req.body);
+exports.signUp = asyncHandler(async (req, res, next) => {
+  const data = await Account.create(req.body);
 
-    res.status(201).json({ success: true, data });
-  } catch (err) {
-    next(err);
-  }
-};
+  res.status(201).json({ success: true, data });
+});
 
 /**
  * @desc    Delete user account
  * @route   DELETE /auth/me
  * @access  Private
  */
-exports.deleteUserAccount = async (req, res, next) => {
-  try {
-    // Delete all the tranactions related to the account
-    await Transaction.destroy({
-      where: { accountNumber: req.user.accountNumber }
-    });
+exports.deleteUserAccount = asyncHandler(async (req, res, next) => {
+  // Delete all the tranactions related to the account
+  await Transaction.destroy({
+    where: { accountNumber: req.user.accountNumber }
+  });
 
-    // Delete account
-    await Account.destroy({
-      where: { accountNumber: req.user.accountNumber }
-    });
+  // Delete account
+  await Account.destroy({
+    where: { accountNumber: req.user.accountNumber }
+  });
 
-    res
-      .status(200)
-      .json({ success: true, message: 'Account deleted successfully' });
-  } catch (err) {
-    next(err);
-  }
-};
+  res
+    .status(200)
+    .json({ success: true, message: 'Account deleted successfully' });
+});

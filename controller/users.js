@@ -1,22 +1,14 @@
 const Account = require('../models/Account');
+const asyncHandler = require('../middleware/asyncHandler');
 
-exports.getAllUsers = async (req, res, next) => {
-  try {
-    const data = await Account.findAll({
-      attributes: { exclude: ['password'] }
-    });
-    res.status(200).json({ success: true, data });
-  } catch (err) {
-    next(err);
-  }
-};
+exports.getAllUsers = asyncHandler(async (req, res, next) => {
+  const data = await Account.findAll({
+    attributes: { exclude: ['password'] }
+  });
+  res.status(200).json({ success: true, data });
+});
 
-exports.createUser = async (req, res, next) => {
-  try {
-    const data = await Account.create(req.body);
-    res.status(201).json({ success: true, data });
-  } catch (err) {
-    console.log(err);
-    res.status(400).json({ success: false });
-  }
-};
+exports.createUser = asyncHandler(async (req, res, next) => {
+  const data = await Account.create(req.body);
+  res.status(201).json({ success: true, data });
+});
