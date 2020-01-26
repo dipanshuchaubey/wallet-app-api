@@ -4,6 +4,7 @@ const db = require('./config/db');
 
 // Middlewares
 const errorHandler = require('./middleware/errorHandler');
+const helmet = require('helmet');
 
 // Mount ENV file
 dotenv.config({ path: './config/config.env' });
@@ -21,6 +22,9 @@ app.use(express.json());
 // Static folder
 app.use(express.static('./public'));
 
+// Mount Middlewares
+app.use(helmet());
+
 // Import router files
 //const Users = require('./routes/users');
 const Auth = require('./routes/auth');
@@ -31,7 +35,7 @@ const Transaction = require('./routes/transaction');
 app.use('/auth', Auth);
 app.use('/transaction', Transaction);
 
-// Mount middlewares
+// Mount error handler middlewares
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;

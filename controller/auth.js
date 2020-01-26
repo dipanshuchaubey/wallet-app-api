@@ -78,6 +78,40 @@ exports.signUp = asyncHandler(async (req, res, next) => {
 });
 
 /**
+ * @desc    Update user password
+ * @route   PUT /auth/me/password
+ * @access  Private
+ */
+exports.updatePassword = asyncHandler(async (req, res, next) => {
+  const { password, newPassword } = req.body;
+
+  if (!newPassword || !password) {
+    return res
+      .status(400)
+      .json({ success: false, error: 'Enter old and new password' });
+  }
+
+  const oldPassword = await Account.findOne({
+    where: { accountNumber: req.user.accountNumber }
+  });
+
+  if (!(await bcrypt.compare(password, oldPassword.password))) {
+    return res
+      .status(401)
+      .json({ success: false, error: 'Current password is incorrect' });
+  }
+
+  await Account.update(
+    { password: newPassword },
+    { where: { accountNumber: req.user.accountNumber }, individualHooks: true }
+  );
+
+  res
+    .status(201)
+    .json({ success: true, data: 'Password updated successfully' });
+});
+
+/**
  * @desc    Delete user account
  * @route   DELETE /auth/me
  * @access  Private

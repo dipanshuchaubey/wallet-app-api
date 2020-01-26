@@ -85,12 +85,21 @@ const Account = db.define('Account', {
   }
 });
 
-// Hash password
-Account.beforeSave(async function(Account) {
+// Hash password before save and update
+Account.addHook('beforeSave', async (account, options) => {
   const salt = await bcrypt.genSalt(10);
 
-  Account.password = await bcrypt.hash(Account.password, salt);
+  account.password = await bcrypt.hash(account.password, salt);
 });
+
+/**
+ *    Custom hook method can also be used
+ *    Account.beforeSave(async function(Account) {
+ *      const salt = await bcrypt.genSalt(10);
+ *
+ *      Account.password = await bcrypt.hash(Account.password, salt);
+ *    });
+ */
 
 // Sign JWT
 Account.prototype.signJWT = function() {
