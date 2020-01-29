@@ -82,7 +82,15 @@ exports.createTransaction = asyncHandler(async (req, res, next) => {
  * @access  Private
  */
 exports.updateTransaction = asyncHandler(async (req, res, next) => {
-  const data = await Transaction.update(req.body, {
+  const updateObj = {
+    amount: req.body.amount,
+    amount: eq.body.amount,
+    type: req.body.type,
+    details: req.body.details,
+    paymentMethod: req.body.paymentMethod
+  }; /* Defining the object before hand so that only below mentioned fields can be updated */
+
+  const data = await Transaction.update(updateObj, {
     where: {
       id: req.params.transactionId,
       accountNumber: req.user.accountNumber
@@ -96,7 +104,7 @@ exports.updateTransaction = asyncHandler(async (req, res, next) => {
    */
   if (data[0] !== 0) {
     res
-      .status(201)
+      .status(200)
       .json({ success: true, message: 'Record updated successfully' });
   } else {
     res.status(404).json({ success: false, message: 'Record does not exists' });

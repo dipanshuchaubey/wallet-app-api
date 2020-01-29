@@ -3,6 +3,7 @@ const {
   login,
   signUp,
   currentlySignedInUser,
+  updateUserDetails,
   updatePassword,
   deleteUserAccount
 } = require('../controller/auth');
@@ -15,8 +16,10 @@ router.post('/login', login);
 router
   .route('/me')
   .post(authorize, currentlySignedInUser)
-  .put(authorize, updatePassword)
+  .put(authorize, updateUserDetails)
   .delete(authorize, deleteUserAccount);
+
+router.put('/me/password', authorize, updatePassword);
 
 router.post('/signup', signUp);
 

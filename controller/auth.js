@@ -78,6 +78,26 @@ exports.signUp = asyncHandler(async (req, res, next) => {
 });
 
 /**
+ * @desc    Update user details
+ * @route   PUT /auth/me
+ * @access  Private
+ */
+exports.updateUserDetails = asyncHandler(async (req, res, next) => {
+  const updateObj = {
+    email: req.body.email,
+    firstName: req.body.firstName,
+    lastName: req.body.lastName
+  }; /* Defining the object before hand so that only below mentioned fields can be updated */
+
+  const data = await Account.update(updateObj, {
+    where: { accountNumber: req.user.accountNumber },
+    individualHooks: true
+  });
+
+  res.status(200).json({ success: true, data });
+});
+
+/**
  * @desc    Update user password
  * @route   PUT /auth/me/password
  * @access  Private
@@ -107,7 +127,7 @@ exports.updatePassword = asyncHandler(async (req, res, next) => {
   );
 
   res
-    .status(201)
+    .status(200)
     .json({ success: true, data: 'Password updated successfully' });
 });
 
