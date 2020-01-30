@@ -6,7 +6,8 @@ const {
   updateUserDetails,
   updatePassword,
   deleteUserAccount,
-  resetPasswordToken
+  resetPasswordToken,
+  resetForgotPassword
 } = require('../controller/auth');
 const { authorize } = require('../middleware/authenticateUser');
 
@@ -23,6 +24,8 @@ router
 router.put('/me/password', authorize, updatePassword);
 
 router.post('/me/forgotpassword', resetPasswordToken);
+
+router.put('/me/resetpassword/:token', resetForgotPassword);
 
 router.post('/signup', signUp);
 

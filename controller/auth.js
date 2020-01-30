@@ -166,21 +166,19 @@ exports.resetPasswordToken = asyncHandler(async (req, res, next) => {
     res.status(400).json({ success: false, error: 'Please enter your email' });
   }
 
-  const exists = await Account.findOne(
-    {
-      attributes: {
-        exclude: [
-          'accountNumber',
-          'password',
-          'firstName',
-          'lastName',
-          'balance',
-          'currency'
-        ]
-      }
+  const exists = await Account.findOne({
+    attributes: {
+      exclude: [
+        'accountNumber',
+        'password',
+        'firstName',
+        'lastName',
+        'balance',
+        'currency'
+      ]
     },
-    { where: { email: req.body.email } }
-  );
+    where: { email: req.body.email }
+  });
 
   if (exists[0] === 0) {
     return res
@@ -211,4 +209,45 @@ exports.resetPasswordToken = asyncHandler(async (req, res, next) => {
   });
 });
 
+/**
+ * @desc    Reset password using token from email
+ * @route   PUT /auth/me/resetpassword
+ * @access  Public
+ */
+exports.resetForgotPassword = asyncHandler(async (req, res, next) => {
+  const token = crypto
+    .createHash('sha256')
+    .update(req.params.token)
+    .digest('hex');
+
+  const account = await Account.findOne({
+    attributes: {
+      exclude: [
+        'accountNumber',
+        'password',
+        'firstName',
+        'lastName',
+        'balance',
+        'currency'
+      ]
+    },
+    where: { resetToken: token }
+  });
+
+  if (!account) {
+    return res
+      .status(401)
+      .json({ success: false, error: 'Provided token is invalid' });
+  }
+
+  await Account.update(
+    { password: req.body.password, resetToken: null },
+    { where: { email: account.dataValues.email }, individualHooks: true }
+  );
+
+  res.status(200).json({
+    success: true,
+    data: 'Your password has been successfully updated'
+  });
+});
 /* FORGOT PASSWORD */
