@@ -30,7 +30,7 @@ exports.getSingleTransaction = asyncHandler(async (req, res, next) => {
   });
 
   if (data[0] === 0) {
-    res.status(404).json({ success: false, message: 'No record found' });
+    return res.status(404).json({ success: false, message: 'No record found' });
   }
 
   res.status(200).json({ success: true, data });
@@ -102,13 +102,15 @@ exports.updateTransaction = asyncHandler(async (req, res, next) => {
    * the number of records that has been updated
    * If no records has been updated sequalize returns [0]
    */
-  if (data[0] !== 0) {
-    res
-      .status(200)
-      .json({ success: true, message: 'Record updated successfully' });
-  } else {
-    res.status(404).json({ success: false, message: 'Record does not exists' });
+  if (data[0] === 0) {
+    return res
+      .status(404)
+      .json({ success: false, message: 'Record does not exists' });
   }
+
+  res
+    .status(200)
+    .json({ success: true, message: 'Record updated successfully' });
 });
 
 /**
@@ -124,15 +126,15 @@ exports.deleteTransaction = asyncHandler(async (req, res, next) => {
     }
   });
 
-  if (data) {
-    res.status(200).json({
-      success: true,
-      message: `Record with id ${req.params.transactionId} Deleted`
-    });
-  } else {
-    res.status(404).json({
+  if (!data) {
+    return res.status(404).json({
       success: true,
       message: `Record does not exists`
     });
   }
+
+  res.status(200).json({
+    success: true,
+    message: `Record with id ${req.params.transactionId} Deleted`
+  });
 });

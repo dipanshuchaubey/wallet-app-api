@@ -15,7 +15,7 @@ exports.login = asyncHandler(async (req, res, next) => {
 
   // If credentials are not provided throw error
   if (!email || !password) {
-    res
+    return res
       .status(400)
       .json({ success: false, error: 'Please enter username and password' });
   }
@@ -34,9 +34,11 @@ exports.login = asyncHandler(async (req, res, next) => {
       // Sign JWT
 
       const token = await account.signJWT();
-      res.status(200).json({ success: true, token });
+      return res.status(200).json({ success: true, token });
     } else {
-      res.status(401).json({ success: false, message: 'Invalid credentials' });
+      return res
+        .status(401)
+        .json({ success: false, message: 'Invalid credentials' });
     }
   } else {
     res.status(401).json({ success: false, message: 'Invalid credentials' });
@@ -44,8 +46,8 @@ exports.login = asyncHandler(async (req, res, next) => {
 });
 
 /**
- * @desc    Get currently  signedin user
- * @route   POST /auth/me
+ * @desc    Logout user
+ * @route   POST /auth/logout
  * @access  Private
  */
 
@@ -163,20 +165,13 @@ exports.deleteUserAccount = asyncHandler(async (req, res, next) => {
 
 exports.resetPasswordToken = asyncHandler(async (req, res, next) => {
   if (!req.body.email) {
-    res.status(400).json({ success: false, error: 'Please enter your email' });
+    return res
+      .status(400)
+      .json({ success: false, error: 'Please enter your email' });
   }
 
   const exists = await Account.findOne({
-    attributes: {
-      exclude: [
-        'accountNumber',
-        'password',
-        'firstName',
-        'lastName',
-        'balance',
-        'currency'
-      ]
-    },
+    attributes: ['email'],
     where: { email: req.body.email }
   });
 
@@ -221,16 +216,7 @@ exports.resetForgotPassword = asyncHandler(async (req, res, next) => {
     .digest('hex');
 
   const account = await Account.findOne({
-    attributes: {
-      exclude: [
-        'accountNumber',
-        'password',
-        'firstName',
-        'lastName',
-        'balance',
-        'currency'
-      ]
-    },
+    attributes: ['email'],
     where: { resetToken: token }
   });
 
