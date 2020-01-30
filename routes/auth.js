@@ -5,7 +5,8 @@ const {
   currentlySignedInUser,
   updateUserDetails,
   updatePassword,
-  deleteUserAccount
+  deleteUserAccount,
+  resetPasswordToken
 } = require('../controller/auth');
 const { authorize } = require('../middleware/authenticateUser');
 
@@ -20,6 +21,8 @@ router
   .delete(authorize, deleteUserAccount);
 
 router.put('/me/password', authorize, updatePassword);
+
+router.post('/me/forgotpassword', resetPasswordToken);
 
 router.post('/signup', signUp);
 

@@ -1,7 +1,9 @@
 const Account = require('../models/Account');
 const Transaction = require('../models/Transaction');
 const asyncHandler = require('../middleware/asyncHandler');
+const sendResetPasswordMail = require('../utils/resetMail');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 /**
  * @desc    Login user
@@ -151,3 +153,62 @@ exports.deleteUserAccount = asyncHandler(async (req, res, next) => {
     .status(200)
     .json({ success: true, message: 'Account deleted successfully' });
 });
+
+/* FORGOT PASSWORD */
+/**
+ * @desc    Generate token for password reset
+ * @route   POST /auth/me/forgotpassword
+ * @access  Public
+ */
+
+exports.resetPasswordToken = asyncHandler(async (req, res, next) => {
+  if (!req.body.email) {
+    res.status(400).json({ success: false, error: 'Please enter your email' });
+  }
+
+  const exists = await Account.findOne(
+    {
+      attributes: {
+        exclude: [
+          'accountNumber',
+          'password',
+          'firstName',
+          'lastName',
+          'balance',
+          'currency'
+        ]
+      }
+    },
+    { where: { email: req.body.email } }
+  );
+
+  if (exists[0] === 0) {
+    return res
+      .status(401)
+      .json({ success: false, error: 'No account found with that email' });
+  }
+
+  const token = crypto.randomBytes(10).toString('hex');
+  const hash = crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex');
+
+  await Account.update(
+    { resetToken: hash },
+    { where: { email: req.body.email } }
+  );
+
+  sendResetPasswordMail(
+    exists.email, // Recipient  email
+    'Reset Password - Wallet App', // Email Subject
+    `To reset your password sent a PUT request using this token ${token}` // Email Body
+  );
+
+  res.status(200).json({
+    success: true,
+    data: 'Reset password link has been sent to your email'
+  });
+});
+
+/* FORGOT PASSWORD */

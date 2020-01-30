@@ -82,6 +82,9 @@ const Account = db.define('Account', {
         msg: 'Curreny is required'
       }
     }
+  },
+  resetToken: {
+    type: Sequelize.STRING
   }
 });
 
