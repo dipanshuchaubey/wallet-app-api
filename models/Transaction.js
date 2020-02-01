@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize');
 const db = require('../config/db');
+const Account = require('./Account');
 
 const Transaction = db.define('Transaction', {
   accountNumber: {
@@ -32,6 +33,13 @@ const Transaction = db.define('Transaction', {
   paymentMethod: {
     type: Sequelize.STRING
   }
+});
+
+Transaction.addHook('beforeDestroy', async (transaction, options) => {
+  return await Account.update(
+    { balance: Sequelize.literal(`balance + ${transaction.amount}`) },
+    { where: { accountNumber: transaction.accountNumber } }
+  );
 });
 
 module.exports = Transaction;

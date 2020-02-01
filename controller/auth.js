@@ -93,12 +93,14 @@ exports.updateUserDetails = asyncHandler(async (req, res, next) => {
     lastName: req.body.lastName
   }; /* Defining the object before hand so that only below mentioned fields can be updated */
 
-  const data = await Account.update(updateObj, {
+  await Account.update(updateObj, {
     where: { accountNumber: req.user.accountNumber },
     individualHooks: true
   });
 
-  res.status(200).json({ success: true, data });
+  res
+    .status(200)
+    .json({ success: true, message: 'Profile updated successfully' });
 });
 
 /**
@@ -175,7 +177,7 @@ exports.resetPasswordToken = asyncHandler(async (req, res, next) => {
     where: { email: req.body.email }
   });
 
-  if (exists[0] === 0) {
+  if (!exists) {
     return res
       .status(401)
       .json({ success: false, error: 'No account found with that email' });

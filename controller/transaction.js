@@ -123,7 +123,8 @@ exports.deleteTransaction = asyncHandler(async (req, res, next) => {
     where: {
       id: req.params.transactionId,
       accountNumber: req.user.accountNumber
-    }
+    },
+    individualHooks: true
   });
 
   if (!data) {
